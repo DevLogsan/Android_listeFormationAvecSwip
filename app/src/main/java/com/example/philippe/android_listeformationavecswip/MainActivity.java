@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity
 
     // L'ADRESSE IP SERA A REMPLACER PAR L'IP DU POSTE CONTENANT LE WEB SERVICE
     //String lien = "http://192.168.1.20:8080/WebServiceFormation/webresources/formation";
-    String lien = "http://192.168.1.90:8080/WebServiceFormation/webresources/formation";
+    String lien = "http://192.168.1.5:8080/WSFormationJSON/webresources/formationJSON";
     URL urlCon;
     HttpURLConnection urlConnection;
 
@@ -63,10 +63,7 @@ public class MainActivity extends AppCompatActivity
         try
         {
             //Récupération, conversion en String et exploitation de la valeur de retour
-            InputStream rep = accesWS.execute().get();
-
-            rd = new BufferedReader(new InputStreamReader(rep));
-            retourWS = rd.readLine();
+            retourWS = accesWS.execute().get();
 
             //System.out.println("RETOUR:" + retourWS);
         }
@@ -145,7 +142,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
     //private class AccesWebServices extends AsyncTask<Void, Void, HttpResponse>
-    private class AccesWebServices extends AsyncTask<Void, Void, InputStream>
+    private class AccesWebServices extends AsyncTask<Void, Void, String>
     {
         @Override
         protected void onPreExecute()
@@ -155,18 +152,29 @@ public class MainActivity extends AppCompatActivity
         }
         @Override
         //protected InputStream doInBackground(Void... params)
-        protected InputStream doInBackground(Void... params)
+        protected String doInBackground(Void... params)
         {
             try
             {
-                System.out.println("MESSAGE1");
+                int statusCode = 0;
+                String ret;
+
                 urlCon = new URL(lien);
-                System.out.println("MESSAGE2");
+                System.out.println("MESSAGE1");
                 urlConnection = (HttpURLConnection) urlCon.openConnection();
-                System.out.println("MESSAGE3");
-                InputStream in = urlConnection.getInputStream();
-                System.out.println("MESSAGE4");
-                return in;
+                statusCode = urlConnection.getResponseCode();
+                if (statusCode == 200) {
+                    System.out.println("MESSAGE2");
+                    InputStream in = urlConnection.getInputStream();
+                    BufferedReader rd = new BufferedReader(new InputStreamReader(in));
+                    ret = rd.readLine();
+                    System.out.println("MESSAGE3 : " + ret);
+                }
+                else
+                {
+                    ret = null;
+                }
+                return ret;
             }
             catch (Exception ex)
             {
